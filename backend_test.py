@@ -360,7 +360,9 @@ def main():
     # Test sequence
     tests = [
         ("API Health Check", tester.test_health_check),
-        ("Owner Login", tester.test_owner_login),
+        ("Demo Login", tester.test_demo_login),
+        ("Demo Limits", tester.test_demo_limits),
+        ("Owner Login (PIN 9988)", tester.test_owner_login),
         ("Create Dealership", tester.test_create_dealership),
         ("User Registration", tester.test_user_registration),
         ("User Login", tester.test_user_login),

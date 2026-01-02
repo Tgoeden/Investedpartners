@@ -296,6 +296,7 @@ const Keys = () => {
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddKey}
+        isRV={isRV}
       />
 
       {/* Checkout Modal */}
@@ -329,6 +330,7 @@ const Keys = () => {
 const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
   const isCheckedOut = keyData.status === 'checked_out';
   const checkout = keyData.current_checkout;
+  const isNew = keyData.condition === 'new';
 
   return (
     <div
@@ -346,16 +348,23 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
             #{keyData.stock_number}
           </span>
         </div>
-        <Badge
-          className={isCheckedOut ? 'status-checked-out' : 'status-available'}
-        >
-          {isCheckedOut ? 'Checked Out' : 'Available'}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge className={isNew ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}>
+            {isNew ? 'New' : 'Used'}
+          </Badge>
+          <Badge
+            className={isCheckedOut ? 'status-checked-out' : 'status-available'}
+          >
+            {isCheckedOut ? 'Out' : 'Available'}
+          </Badge>
+        </div>
       </div>
 
-      <p className="text-slate-700 font-medium">{keyData.vehicle_model}</p>
-      {keyData.vehicle_year && (
-        <p className="text-sm text-slate-500">{keyData.vehicle_year}</p>
+      <p className="text-slate-700 font-medium">
+        {keyData.vehicle_year} {keyData.vehicle_make} {keyData.vehicle_model}
+      </p>
+      {keyData.vehicle_vin && (
+        <p className="text-xs text-slate-400 font-mono mt-1">VIN: {keyData.vehicle_vin}</p>
       )}
 
       {isCheckedOut && checkout && (
@@ -405,12 +414,14 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
   );
 };
 
-const AddKeyModal = ({ open, onClose, onSubmit }) => {
+const AddKeyModal = ({ open, onClose, onSubmit, isRV }) => {
   const [form, setForm] = useState({
     stock_number: '',
-    vehicle_model: '',
     vehicle_year: '',
+    vehicle_make: '',
+    vehicle_model: '',
     vehicle_vin: '',
+    condition: 'new',
   });
   const [loading, setLoading] = useState(false);
 
@@ -418,11 +429,15 @@ const AddKeyModal = ({ open, onClose, onSubmit }) => {
     e.preventDefault();
     setLoading(true);
     await onSubmit({
-      ...form,
+      stock_number: form.stock_number,
       vehicle_year: form.vehicle_year ? parseInt(form.vehicle_year) : null,
+      vehicle_make: form.vehicle_make || null,
+      vehicle_model: form.vehicle_model,
+      vehicle_vin: form.vehicle_vin || null,
+      condition: form.condition,
     });
     setLoading(false);
-    setForm({ stock_number: '', vehicle_model: '', vehicle_year: '', vehicle_vin: '' });
+    setForm({ stock_number: '', vehicle_year: '', vehicle_make: '', vehicle_model: '', vehicle_vin: '', condition: 'new' });
   };
 
   return (
@@ -442,17 +457,39 @@ const AddKeyModal = ({ open, onClose, onSubmit }) => {
               data-testid="add-key-stock"
             />
           </div>
+          
+          {/* Condition: New or Used */}
           <div className="space-y-2">
-            <Label>Vehicle Model *</Label>
-            <Input
-              value={form.vehicle_model}
-              onChange={(e) => setForm({ ...form, vehicle_model: e.target.value })}
-              placeholder="e.g., 2024 Ford F-150"
-              required
-              data-testid="add-key-model"
-            />
+            <Label>Condition *</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, condition: 'new' })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  form.condition === 'new'
+                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+                data-testid="condition-new"
+              >
+                <span className="font-semibold">New</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, condition: 'used' })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  form.condition === 'used'
+                    ? 'border-slate-500 bg-slate-50 text-slate-700'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+                data-testid="condition-used"
+              >
+                <span className="font-semibold">Used</span>
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Year</Label>
               <Input
@@ -463,8 +500,32 @@ const AddKeyModal = ({ open, onClose, onSubmit }) => {
                 data-testid="add-key-year"
               />
             </div>
+            <div className="space-y-2 col-span-2">
+              <Label>Make</Label>
+              <Input
+                value={form.vehicle_make}
+                onChange={(e) => setForm({ ...form, vehicle_make: e.target.value })}
+                placeholder="e.g., Ford, Thor, Winnebago"
+                data-testid="add-key-make"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Model *</Label>
+            <Input
+              value={form.vehicle_model}
+              onChange={(e) => setForm({ ...form, vehicle_model: e.target.value })}
+              placeholder={isRV ? "e.g., Sunseeker, Minnie Winnie" : "e.g., F-150, Camry"}
+              required
+              data-testid="add-key-model"
+            />
+          </div>
+          
+          {/* VIN - Only show for Automotive dealerships */}
+          {!isRV && (
             <div className="space-y-2">
-              <Label>VIN</Label>
+              <Label>VIN (optional)</Label>
               <Input
                 value={form.vehicle_vin}
                 onChange={(e) => setForm({ ...form, vehicle_vin: e.target.value })}
@@ -472,7 +533,8 @@ const AddKeyModal = ({ open, onClose, onSubmit }) => {
                 data-testid="add-key-vin"
               />
             </div>
-          </div>
+          )}
+          
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
               Cancel

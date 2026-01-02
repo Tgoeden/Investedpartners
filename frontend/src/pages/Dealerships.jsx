@@ -288,8 +288,12 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
     address: '',
     phone: '',
     service_bays: 0,
+    admin_email: '',
+    admin_password: '',
+    admin_name: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (dealership) {
@@ -299,6 +303,9 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
         address: dealership.address || '',
         phone: dealership.phone || '',
         service_bays: dealership.service_bays || 0,
+        admin_email: '',
+        admin_password: '',
+        admin_name: '',
       });
     } else {
       setForm({
@@ -307,6 +314,9 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
         address: '',
         phone: '',
         service_bays: 0,
+        admin_email: '',
+        admin_password: '',
+        admin_name: '',
       });
     }
   }, [dealership]);
@@ -316,17 +326,28 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
     if (!form.dealership_type) {
       return;
     }
+    // Validate admin credentials for new dealership
+    if (!dealership && (!form.admin_email || !form.admin_password)) {
+      toast.error('Admin email and password are required for new dealerships');
+      return;
+    }
     setLoading(true);
     await onSubmit({
-      ...form,
+      name: form.name,
+      dealership_type: form.dealership_type,
+      address: form.address || null,
+      phone: form.phone || null,
       service_bays: parseInt(form.service_bays) || 0,
+      admin_email: form.admin_email || null,
+      admin_password: form.admin_password || null,
+      admin_name: form.admin_name || null,
     });
     setLoading(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent data-testid="dealership-modal">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" data-testid="dealership-modal">
         <DialogHeader>
           <DialogTitle>{dealership ? 'Edit' : 'Add'} Dealership</DialogTitle>
         </DialogHeader>
@@ -445,6 +466,63 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
               />
             </div>
           )}
+          
+          {/* Admin Account Section - Only for new dealerships */}
+          {!dealership && (
+            <div className="border-t border-slate-200 pt-4 mt-4">
+              <h4 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5 text-slate-500" />
+                Dealership Admin Account *
+              </h4>
+              <p className="text-sm text-slate-500 mb-4">
+                Create login credentials for this dealership's administrator
+              </p>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>Admin Name *</Label>
+                  <Input
+                    value={form.admin_name}
+                    onChange={(e) => setForm({ ...form, admin_name: e.target.value })}
+                    placeholder="John Smith"
+                    required
+                    data-testid="admin-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Admin Email (Username) *</Label>
+                  <Input
+                    type="email"
+                    value={form.admin_email}
+                    onChange={(e) => setForm({ ...form, admin_email: e.target.value })}
+                    placeholder="admin@dealership.com"
+                    required
+                    data-testid="admin-email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Admin Password *</Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={form.admin_password}
+                      onChange={(e) => setForm({ ...form, admin_password: e.target.value })}
+                      placeholder="••••••••"
+                      required
+                      data-testid="admin-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
               Cancel
@@ -452,10 +530,10 @@ const DealershipModal = ({ open, onClose, onSubmit, dealership }) => {
             <Button 
               type="submit" 
               className="flex-1" 
-              disabled={loading || !form.dealership_type} 
+              disabled={loading || !form.dealership_type || (!dealership && (!form.admin_email || !form.admin_password))} 
               data-testid="dealership-submit"
             >
-              {loading ? 'Saving...' : dealership ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : dealership ? 'Update' : 'Create Dealership & Admin'}
             </Button>
           </div>
         </form>

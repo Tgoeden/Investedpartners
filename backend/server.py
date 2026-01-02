@@ -451,6 +451,7 @@ async def get_demo_limits(user: dict = Depends(get_current_user)):
 
 @api_router.post("/dealerships", response_model=DealershipResponse)
 async def create_dealership(data: DealershipCreate, user: dict = Depends(require_role(UserRole.OWNER))):
+    """Only owners can create dealerships. Optionally creates admin account."""
     dealership_id = str(uuid.uuid4())
     doc = {
         "id": dealership_id,
@@ -463,6 +464,25 @@ async def create_dealership(data: DealershipCreate, user: dict = Depends(require
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.dealerships.insert_one(doc)
+    
+    # Create admin account if credentials provided
+    if data.admin_email and data.admin_password:
+        existing = await db.users.find_one({"email": data.admin_email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Admin email already registered")
+        
+        admin_id = str(uuid.uuid4())
+        admin_doc = {
+            "id": admin_id,
+            "email": data.admin_email,
+            "password": hash_password(data.admin_password),
+            "name": data.admin_name or f"{data.name} Admin",
+            "role": UserRole.DEALERSHIP_ADMIN,
+            "dealership_id": dealership_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.users.insert_one(admin_doc)
+    
     return DealershipResponse(**doc)
 
 @api_router.get("/dealerships", response_model=List[DealershipResponse])
@@ -593,9 +613,11 @@ async def create_key(data: KeyCreate, user: dict = Depends(require_role(UserRole
     doc = {
         "id": key_id,
         "stock_number": data.stock_number,
-        "vehicle_model": data.vehicle_model,
         "vehicle_year": data.vehicle_year,
+        "vehicle_make": data.vehicle_make,
+        "vehicle_model": data.vehicle_model,
         "vehicle_vin": data.vehicle_vin,
+        "condition": data.condition,
         "dealership_id": data.dealership_id,
         "status": KeyStatus.AVAILABLE,
         "current_checkout": None,

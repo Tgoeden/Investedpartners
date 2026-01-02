@@ -10,28 +10,34 @@ Build a web app called KeyFlow for dealership key management with:
 - Support for both Automotive and RV dealerships
 - RV service bay tracking
 - Sales Tracker: yearly goals, daily tracking, progress visualization
+- Demo account for trying the app without credentials
 
 ## User Personas
-1. **System Owner**: Has access to all dealerships, can create dealerships, view all data
+1. **System Owner**: Has access to all dealerships, can create dealerships, view all data (PIN: 9988)
 2. **Dealership Admin**: Manages users and keys for their dealership, views team sales progress
 3. **Sales Staff (User)**: Checks out/returns keys, tracks their own sales activities
+4. **Demo User**: Admin access with limited features (4 keys, 1 user max)
 
 ## Core Requirements
 | Feature | Priority | Status |
 |---------|----------|--------|
 | JWT Authentication | P0 | ✅ Implemented |
-| Secret Owner Login (5-tap + PIN) | P0 | ✅ Implemented |
+| Secret Owner Login (5-tap + PIN 9988) | P0 | ✅ Implemented |
+| Demo Login (No Credentials) | P0 | ✅ Implemented |
+| Custom Logo Integration | P0 | ✅ Implemented |
 | Dealership CRUD | P0 | ✅ Implemented |
+| RV vs Auto Type Selection | P0 | ✅ Implemented (Visual Cards) |
 | User Management | P0 | ✅ Implemented |
 | Key Management | P0 | ✅ Implemented |
 | Key Checkout/Return | P0 | ✅ Implemented |
-| Checkout Reasons | P0 | ✅ Implemented |
+| Checkout Reasons (Auto: 4, RV: 5) | P0 | ✅ Implemented |
 | Time Alerts | P0 | ✅ Implemented |
 | RV Service Bays | P1 | ✅ Implemented |
 | Sales Tracker Goals | P0 | ✅ Implemented |
 | Daily Activity Logging | P0 | ✅ Implemented |
 | Progress Visualization | P0 | ✅ Implemented |
 | Team Sales View (Admin) | P1 | ✅ Implemented |
+| Demo Account Limits | P1 | ✅ Implemented |
 | Payment Integration | P2 | ⏳ Deferred (user request) |
 
 ## What's Been Implemented (Jan 2, 2026)

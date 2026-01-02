@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
-import { userApi, dealershipApi } from '../lib/api';
+import { userApi, dealershipApi, authApi } from '../lib/api';
 import { Layout } from '../components/layout/Layout';
 import {
   Users as UsersIcon,
@@ -9,6 +9,7 @@ import {
   Trash2,
   Mail,
   Building2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -42,7 +43,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const Users = () => {
-  const { user, isOwner, isDealershipAdmin } = useAuth();
+  const { user, isOwner, isDealershipAdmin, isDemo } = useAuth();
   const [users, setUsers] = useState([]);
   const [dealerships, setDealerships] = useState([]);
   const [selectedDealership, setSelectedDealership] = useState('');
@@ -50,14 +51,27 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteUser, setDeleteUser] = useState(null);
+  const [demoLimits, setDemoLimits] = useState(null);
 
   useEffect(() => {
     fetchDealerships();
+    if (isDemo) {
+      fetchDemoLimits();
+    }
   }, []);
 
   useEffect(() => {
     fetchUsers();
   }, [selectedDealership]);
+
+  const fetchDemoLimits = async () => {
+    try {
+      const res = await authApi.getDemoLimits();
+      setDemoLimits(res.data);
+    } catch (err) {
+      console.error('Failed to fetch demo limits:', err);
+    }
+  };
 
   const fetchDealerships = async () => {
     try {
@@ -89,6 +103,7 @@ const Users = () => {
       toast.success('User created successfully');
       setShowAddModal(false);
       fetchUsers();
+      if (isDemo) fetchDemoLimits();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to create user');
     }
@@ -101,6 +116,7 @@ const Users = () => {
       toast.success('User deleted successfully');
       setDeleteUser(null);
       fetchUsers();
+      if (isDemo) fetchDemoLimits();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to delete user');
     }
@@ -126,9 +142,26 @@ const Users = () => {
     }
   };
 
+  const canAddUsers = !isDemo || (demoLimits?.can_add_users ?? true);
+
   return (
     <Layout>
       <div className="p-6 lg:p-10 space-y-6" data-testid="users-page">
+        {/* Demo Limits Banner */}
+        {isDemo && demoLimits && (
+          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800">
+                Demo Mode: {demoLimits.current_users} / {demoLimits.max_users} additional users
+              </p>
+              <p className="text-xs text-amber-600">
+                Upgrade to add unlimited team members
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -139,9 +172,14 @@ const Users = () => {
               Manage dealership staff and access
             </p>
           </div>
-          <Button onClick={() => setShowAddModal(true)} data-testid="add-user-btn">
+          <Button 
+            onClick={() => setShowAddModal(true)} 
+            disabled={!canAddUsers}
+            data-testid="add-user-btn"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add User
+            {!canAddUsers && ' (Limit Reached)'}
           </Button>
         </div>
 

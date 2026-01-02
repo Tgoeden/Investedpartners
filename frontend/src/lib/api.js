@@ -36,7 +36,9 @@ export const authApi = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (data) => api.post('/auth/register', data),
   ownerLogin: (pin) => api.post('/auth/owner-login', { pin }),
+  demoLogin: () => api.post('/auth/demo-login'),
   getMe: () => api.get('/auth/me'),
+  getDemoLimits: () => api.get('/demo-limits'),
 };
 
 // Dealerships

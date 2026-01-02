@@ -46,6 +46,15 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const demoLogin = async () => {
+    const res = await authApi.demoLogin();
+    const { access_token, user: userData } = res.data;
+    localStorage.setItem('keyflow_token', access_token);
+    localStorage.setItem('keyflow_user', JSON.stringify({...userData, is_demo: true}));
+    setUser({...userData, is_demo: true});
+    return userData;
+  };
+
   const register = async (data) => {
     const res = await authApi.register(data);
     const { access_token, user: userData } = res.data;
@@ -64,6 +73,7 @@ export const AuthProvider = ({ children }) => {
   const isOwner = user?.role === 'owner';
   const isDealershipAdmin = user?.role === 'dealership_admin';
   const isUser = user?.role === 'user';
+  const isDemo = user?.is_demo === true;
 
   return (
     <AuthContext.Provider value={{
@@ -71,11 +81,13 @@ export const AuthProvider = ({ children }) => {
       loading,
       login,
       ownerLogin,
+      demoLogin,
       register,
       logout,
       isOwner,
       isDealershipAdmin,
       isUser,
+      isDemo,
       isAuthenticated: !!user,
     }}>
       {children}

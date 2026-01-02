@@ -332,18 +332,20 @@ class KeyFlowAPITester:
 
     def test_create_rv_dealership(self):
         """Create an RV dealership to test RV-specific features"""
+        import time
+        timestamp = int(time.time())
         success, response = self.run_test(
             "Create RV Dealership",
             "POST",
             "dealerships",
             200,
             data={
-                "name": "Test RV Dealership",
+                "name": f"Test RV Dealership {timestamp}",
                 "dealership_type": "rv",
                 "address": "789 RV Lane",
                 "phone": "555-0789",
                 "service_bays": 10,
-                "admin_email": "admin@rvdealership.com",
+                "admin_email": f"rvadmin{timestamp}@rvdealership.com",
                 "admin_password": "admin123",
                 "admin_name": "RV Admin"
             },

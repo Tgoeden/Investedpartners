@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
-import { keyApi, dealershipApi } from '../lib/api';
+import { keyApi, dealershipApi, authApi } from '../lib/api';
 import { Layout } from '../components/layout/Layout';
 import {
   Key,
@@ -13,6 +13,7 @@ import {
   Car,
   Truck,
   ChevronDown,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -35,16 +36,25 @@ import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
-const CHECKOUT_REASONS = [
+// Checkout reasons for AUTOMOTIVE dealerships
+const AUTO_CHECKOUT_REASONS = [
   { value: 'test_drive', label: 'Test Drive' },
   { value: 'service_loaner', label: 'Service Loaner' },
   { value: 'extended_test_drive', label: 'Extended Test Drive' },
   { value: 'show_move', label: 'Show/Move' },
-  { value: 'service', label: 'Service (RV)' },
+];
+
+// Checkout reasons for RV dealerships (includes service bay option)
+const RV_CHECKOUT_REASONS = [
+  { value: 'test_drive', label: 'Test Drive' },
+  { value: 'service_loaner', label: 'Service Loaner' },
+  { value: 'extended_test_drive', label: 'Extended Test Drive' },
+  { value: 'show_move', label: 'Show/Move' },
+  { value: 'service', label: 'Service (Assign to Bay)' },
 ];
 
 const Keys = () => {
-  const { user, isOwner, isDealershipAdmin } = useAuth();
+  const { user, isOwner, isDealershipAdmin, isDemo } = useAuth();
   const [keys, setKeys] = useState([]);
   const [dealerships, setDealerships] = useState([]);
   const [selectedDealership, setSelectedDealership] = useState('');
@@ -55,9 +65,13 @@ const Keys = () => {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [selectedKey, setSelectedKey] = useState(null);
+  const [demoLimits, setDemoLimits] = useState(null);
 
   useEffect(() => {
     fetchDealerships();
+    if (isDemo) {
+      fetchDemoLimits();
+    }
   }, []);
 
   useEffect(() => {
@@ -65,6 +79,15 @@ const Keys = () => {
       fetchKeys();
     }
   }, [selectedDealership, filter]);
+
+  const fetchDemoLimits = async () => {
+    try {
+      const res = await authApi.getDemoLimits();
+      setDemoLimits(res.data);
+    } catch (err) {
+      console.error('Failed to fetch demo limits:', err);
+    }
+  };
 
   const fetchDealerships = async () => {
     try {
@@ -127,6 +150,7 @@ const Keys = () => {
       toast.success('Key added successfully');
       setShowAddModal(false);
       fetchKeys();
+      if (isDemo) fetchDemoLimits();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to add key');
     }
@@ -144,10 +168,27 @@ const Keys = () => {
 
   const currentDealership = dealerships.find((d) => d.id === selectedDealership);
   const isRV = currentDealership?.dealership_type === 'rv';
+  const checkoutReasons = isRV ? RV_CHECKOUT_REASONS : AUTO_CHECKOUT_REASONS;
+  const canAddKeys = !isDemo || (demoLimits?.can_add_keys ?? true);
 
   return (
     <Layout>
       <div className="p-6 lg:p-10 space-y-6" data-testid="keys-page">
+        {/* Demo Limits Banner */}
+        {isDemo && demoLimits && (
+          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-800">
+                Demo Mode: {demoLimits.current_keys} / {demoLimits.max_keys} keys used
+              </p>
+              <p className="text-xs text-amber-600">
+                Upgrade to a full account to add unlimited keys
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -159,9 +200,14 @@ const Keys = () => {
             </p>
           </div>
           {(isOwner || isDealershipAdmin) && (
-            <Button onClick={() => setShowAddModal(true)} data-testid="add-key-btn">
+            <Button 
+              onClick={() => setShowAddModal(true)} 
+              disabled={!canAddKeys}
+              data-testid="add-key-btn"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Key
+              {!canAddKeys && ' (Limit Reached)'}
             </Button>
           )}
         </div>
@@ -261,6 +307,7 @@ const Keys = () => {
         }}
         keyData={selectedKey}
         isRV={isRV}
+        checkoutReasons={checkoutReasons}
         serviceBays={currentDealership?.service_bays || 0}
         onSubmit={handleCheckout}
       />
@@ -440,7 +487,7 @@ const AddKeyModal = ({ open, onClose, onSubmit }) => {
   );
 };
 
-const CheckoutModal = ({ open, onClose, keyData, isRV, serviceBays, onSubmit }) => {
+const CheckoutModal = ({ open, onClose, keyData, isRV, checkoutReasons, serviceBays, onSubmit }) => {
   const [form, setForm] = useState({
     reason: '',
     notes: '',
@@ -480,7 +527,7 @@ const CheckoutModal = ({ open, onClose, keyData, isRV, serviceBays, onSubmit }) 
                 <SelectValue placeholder="Select reason" />
               </SelectTrigger>
               <SelectContent>
-                {CHECKOUT_REASONS.filter((r) => isRV || r.value !== 'service').map((r) => (
+                {checkoutReasons.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
                     {r.label}
                   </SelectItem>
@@ -491,7 +538,7 @@ const CheckoutModal = ({ open, onClose, keyData, isRV, serviceBays, onSubmit }) 
 
           {isRV && form.reason === 'service' && serviceBays > 0 && (
             <div className="space-y-2">
-              <Label>Service Bay</Label>
+              <Label>Service Bay *</Label>
               <Select value={form.service_bay} onValueChange={(v) => setForm({ ...form, service_bay: v })}>
                 <SelectTrigger data-testid="checkout-bay">
                   <SelectValue placeholder="Select bay" />

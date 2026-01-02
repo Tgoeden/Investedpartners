@@ -281,6 +281,10 @@ class KeyFlowAPITester:
 
     def test_create_key_with_new_fields(self):
         """Create a test key with new condition and vehicle_make fields"""
+        if not hasattr(self, 'dealership_id') or not self.dealership_id:
+            print("❌ No dealership available for key creation test")
+            return False
+            
         success, response = self.run_test(
             "Create Key with New Fields",
             "POST",
@@ -310,6 +314,10 @@ class KeyFlowAPITester:
 
     def test_create_used_key(self):
         """Create a used key to test condition field"""
+        if not hasattr(self, 'dealership_id') or not self.dealership_id:
+            print("❌ No dealership available for used key creation test")
+            return False
+            
         success, response = self.run_test(
             "Create Used Key",
             "POST",

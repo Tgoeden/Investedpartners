@@ -10,6 +10,7 @@ class KeyFlowAPITester:
         self.base_url = base_url
         self.token = None
         self.owner_token = None
+        self.demo_token = None
         self.dealership_id = None
         self.user_id = None
         self.key_id = None

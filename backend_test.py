@@ -18,13 +18,19 @@ class KeyFlowAPITester:
         self.tests_passed = 0
         self.failed_tests = []
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, use_owner_token=False):
+    def run_test(self, name, method, endpoint, expected_status, data=None, use_owner_token=False, use_demo_token=False):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
         
         # Use appropriate token
-        token = self.owner_token if use_owner_token else self.token
+        if use_demo_token:
+            token = self.demo_token
+        elif use_owner_token:
+            token = self.owner_token
+        else:
+            token = self.token
+            
         if token:
             headers['Authorization'] = f'Bearer {token}'
 

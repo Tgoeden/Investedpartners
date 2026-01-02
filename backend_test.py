@@ -135,10 +135,10 @@ class KeyFlowAPITester:
             return True
         return False
 
-    def test_create_dealership(self):
-        """Create a test dealership as owner"""
+    def test_create_dealership_with_admin(self):
+        """Create a test dealership with admin credentials as owner"""
         success, response = self.run_test(
-            "Create Dealership",
+            "Create Dealership with Admin",
             "POST",
             "dealerships",
             200,
@@ -146,7 +146,10 @@ class KeyFlowAPITester:
                 "name": "Test Auto Dealership",
                 "dealership_type": "automotive",
                 "address": "123 Test St",
-                "phone": "555-0123"
+                "phone": "555-0123",
+                "admin_email": "admin@testdealership.com",
+                "admin_password": "admin123",
+                "admin_name": "Test Admin"
             },
             use_owner_token=True
         )
@@ -155,6 +158,75 @@ class KeyFlowAPITester:
             print(f"   Dealership created: {self.dealership_id}")
             return True
         return False
+
+    def test_create_dealership_without_admin_fails(self):
+        """Test that creating dealership without admin credentials should still work but not create admin"""
+        success, response = self.run_test(
+            "Create Dealership without Admin",
+            "POST",
+            "dealerships",
+            200,
+            data={
+                "name": "Test Dealership No Admin",
+                "dealership_type": "automotive",
+                "address": "456 Test Ave",
+                "phone": "555-0456"
+            },
+            use_owner_token=True
+        )
+        return success
+
+    def test_non_owner_cannot_create_dealership(self):
+        """Test that non-owners get 403 when trying to create dealerships"""
+        # First create a regular user token
+        success, response = self.run_test(
+            "Register Regular User",
+            "POST",
+            "auth/register",
+            200,
+            data={
+                "email": "regular@user.com",
+                "password": "password123",
+                "name": "Regular User",
+                "role": "user"
+            }
+        )
+        
+        if not success:
+            return False
+            
+        regular_token = response.get('access_token')
+        if not regular_token:
+            return False
+            
+        # Now try to create dealership with regular user token
+        headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {regular_token}'}
+        url = f"{self.base_url}/dealerships"
+        
+        try:
+            response = requests.post(url, json={
+                "name": "Should Fail Dealership",
+                "dealership_type": "automotive"
+            }, headers=headers, timeout=10)
+            
+            success = response.status_code == 403
+            if success:
+                print(f"✅ Passed - Non-owner correctly denied with 403")
+                self.tests_passed += 1
+            else:
+                print(f"❌ Failed - Expected 403, got {response.status_code}")
+                self.failed_tests.append({
+                    'name': 'Non-owner dealership creation',
+                    'expected': 403,
+                    'actual': response.status_code
+                })
+            self.tests_run += 1
+            return success
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            self.failed_tests.append({'name': 'Non-owner dealership creation', 'error': str(e)})
+            self.tests_run += 1
+            return False
 
     def test_user_registration(self):
         """Test user registration"""

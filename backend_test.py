@@ -137,17 +137,19 @@ class KeyFlowAPITester:
 
     def test_create_dealership_with_admin(self):
         """Create a test dealership with admin credentials as owner"""
+        import time
+        timestamp = int(time.time())
         success, response = self.run_test(
             "Create Dealership with Admin",
             "POST",
             "dealerships",
             200,
             data={
-                "name": "Test Auto Dealership",
+                "name": f"Test Auto Dealership {timestamp}",
                 "dealership_type": "automotive",
                 "address": "123 Test St",
                 "phone": "555-0123",
-                "admin_email": "admin@testdealership.com",
+                "admin_email": f"admin{timestamp}@testdealership.com",
                 "admin_password": "admin123",
                 "admin_name": "Test Admin"
             },
@@ -155,19 +157,23 @@ class KeyFlowAPITester:
         )
         if success and 'id' in response:
             self.dealership_id = response['id']
+            self.admin_email = f"admin{timestamp}@testdealership.com"
             print(f"   Dealership created: {self.dealership_id}")
+            print(f"   Admin email: {self.admin_email}")
             return True
         return False
 
     def test_create_dealership_without_admin_fails(self):
         """Test that creating dealership without admin credentials should still work but not create admin"""
+        import time
+        timestamp = int(time.time())
         success, response = self.run_test(
             "Create Dealership without Admin",
             "POST",
             "dealerships",
             200,
             data={
-                "name": "Test Dealership No Admin",
+                "name": f"Test Dealership No Admin {timestamp}",
                 "dealership_type": "automotive",
                 "address": "456 Test Ave",
                 "phone": "555-0456"
@@ -178,6 +184,8 @@ class KeyFlowAPITester:
 
     def test_non_owner_cannot_create_dealership(self):
         """Test that non-owners get 403 when trying to create dealerships"""
+        import time
+        timestamp = int(time.time())
         # First create a regular user token
         success, response = self.run_test(
             "Register Regular User",
@@ -185,7 +193,7 @@ class KeyFlowAPITester:
             "auth/register",
             200,
             data={
-                "email": "regular@user.com",
+                "email": f"regular{timestamp}@user.com",
                 "password": "password123",
                 "name": "Regular User",
                 "role": "user"

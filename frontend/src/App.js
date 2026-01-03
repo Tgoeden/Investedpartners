@@ -12,6 +12,10 @@ import Users from "./pages/Users";
 import Dealerships from "./pages/Dealerships";
 import ServiceBays from "./pages/ServiceBays";
 import TimeAlerts from "./pages/TimeAlerts";
+import Settings from "./pages/Settings";
+import Help from "./pages/Help";
+import Logs from "./pages/Logs";
+import ShareAccess from "./pages/ShareAccess";
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -19,10 +23,10 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b]">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-slate-900 rounded-xl" />
-          <div className="h-4 w-24 bg-slate-200 rounded" />
+          <div className="w-12 h-12 bg-cyan-500/20 rounded-xl" />
+          <div className="h-4 w-24 bg-white/10 rounded" />
         </div>
       </div>
     );
@@ -41,17 +45,17 @@ const PublicRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b]">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-slate-900 rounded-xl" />
-          <div className="h-4 w-24 bg-slate-200 rounded" />
+          <div className="w-12 h-12 bg-cyan-500/20 rounded-xl" />
+          <div className="h-4 w-24 bg-white/10 rounded" />
         </div>
       </div>
     );
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/keys" replace />;
   }
 
   return children;
@@ -127,10 +131,42 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/help"
+        element={
+          <ProtectedRoute>
+            <Help />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/logs"
+        element={
+          <ProtectedRoute>
+            <Logs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/share"
+        element={
+          <ProtectedRoute>
+            <ShareAccess />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/keys" replace />} />
+      <Route path="*" element={<Navigate to="/keys" replace />} />
     </Routes>
   );
 }
@@ -140,7 +176,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-right" richColors theme="dark" />
       </BrowserRouter>
     </AuthProvider>
   );

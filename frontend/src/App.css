@@ -1,41 +1,54 @@
-/* KeyFlow App Styles */
+/* KeyFlow App Styles - Dark Theme */
 
 /* Layout */
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #0a0a0b;
+  overflow-x: hidden;
 }
 
 .main-layout {
   display: flex;
+  flex-direction: column;
   flex: 1;
+  min-height: 100vh;
 }
 
-.sidebar {
-  width: 280px;
-  background: white;
-  border-right: 1px solid #e2e8f0;
+/* Top Navigation Bar */
+.top-nav {
+  background: #111113;
+  border-bottom: 1px solid #1f1f23;
+  padding: 0.75rem 1.5rem;
   display: flex;
-  flex-direction: column;
-  position: fixed;
-  height: 100vh;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
   z-index: 40;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-/* Auth page */
+@media (min-width: 1024px) {
+  .main-content {
+    padding: 2rem 3rem;
+  }
+}
+
+/* Auth page - dark */
 .auth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #0a0a0b;
   position: relative;
   overflow: hidden;
 }
@@ -47,7 +60,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 50%);
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.05) 0%, transparent 50%);
   animation: rotate 30s linear infinite;
 }
 
@@ -57,27 +70,29 @@
 }
 
 .auth-card {
-  background: white;
+  background: #111113;
+  border: 1px solid #1f1f23;
   border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-  padding: 3rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  padding: 2.5rem;
   width: 100%;
   max-width: 420px;
   position: relative;
   z-index: 1;
 }
 
-/* Dashboard cards */
+/* Dashboard cards - dark */
 .stat-card {
-  background: white;
+  background: #111113;
   border-radius: 1rem;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1f1f23;
   transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-  box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.5);
+  border-color: #333;
   transform: translateY(-2px);
 }
 
@@ -90,18 +105,18 @@
   justify-content: center;
 }
 
-/* Key cards */
+/* Key cards - dark */
 .key-card {
-  background: white;
+  background: #111113;
   border-radius: 1rem;
   padding: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1f1f23;
   transition: all 0.2s ease;
 }
 
 .key-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+  border-color: #333;
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
 }
 
 .key-card.checked-out {
@@ -109,14 +124,14 @@
 }
 
 .key-card.available {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid #22c55e;
 }
 
 .key-card.overdue {
   border-left: 4px solid #ef4444;
 }
 
-/* Bay grid */
+/* Bay grid - dark */
 .bay-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -126,7 +141,8 @@
 .bay-slot {
   aspect-ratio: 1;
   border-radius: 1rem;
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed #333;
+  background: #111113;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -137,13 +153,13 @@
 
 .bay-slot.occupied {
   border-style: solid;
-  border-color: #2563eb;
-  background: #eff6ff;
+  border-color: #22d3ee;
+  background: rgba(34, 211, 238, 0.1);
 }
 
 .bay-slot:hover {
-  border-color: #94a3b8;
-  background: #f8fafc;
+  border-color: #555;
+  background: #1a1a1c;
 }
 
 /* Progress ring */
@@ -160,12 +176,12 @@
   transform-origin: 50% 50%;
 }
 
-/* Sales tracker */
+/* Sales tracker - dark */
 .tracker-card {
-  background: white;
+  background: #111113;
   border-radius: 1rem;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #1f1f23;
 }
 
 .daily-input-grid {
@@ -174,46 +190,86 @@
   gap: 1rem;
 }
 
-/* Modal backdrop */
+/* Modal backdrop - dark */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(4px);
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
 }
 
 .modal-content {
-  background: white;
+  background: #111113;
+  border: 1px solid #1f1f23;
   border-radius: 1.5rem;
   padding: 2rem;
   max-width: 500px;
-  width: 90%;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   animation: slideIn 0.2s ease-out;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  
-  .main-content {
-    margin-left: 0;
-  }
+/* Sales Tracker Button - Prominent */
+.sales-tracker-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+.sales-tracker-btn:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Menu dropdown */
+.menu-dropdown {
+  background: #111113;
+  border: 1px solid #1f1f23;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 0.5rem;
+  min-width: 200px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.menu-item.active {
+  background: rgba(34, 211, 238, 0.1);
+  color: #22d3ee;
 }
 
 /* Toast customization */
 [data-sonner-toast] {
   font-family: var(--font-body);
+  background: #111113 !important;
+  border: 1px solid #1f1f23 !important;
+  color: #f1f5f9 !important;
 }

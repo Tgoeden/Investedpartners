@@ -173,16 +173,16 @@ const Keys = () => {
 
   return (
     <Layout>
-      <div className="p-6 lg:p-10 space-y-6" data-testid="keys-page">
+      <div className="space-y-6" data-testid="keys-page">
         {/* Demo Limits Banner */}
         {isDemo && demoLimits && (
-          <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-800">
+              <p className="text-sm font-medium text-amber-300">
                 Demo Mode: {demoLimits.current_keys} / {demoLimits.max_keys} keys used
               </p>
-              <p className="text-xs text-amber-600">
+              <p className="text-xs text-amber-400/70">
                 Upgrade to a full account to add unlimited keys
               </p>
             </div>
@@ -192,10 +192,10 @@ const Keys = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
               Key Management
             </h1>
-            <p className="text-slate-500 mt-1">
+            <p className="text-slate-400 mt-1">
               Track and manage all vehicle keys
             </p>
           </div>
@@ -203,6 +203,7 @@ const Keys = () => {
             <Button 
               onClick={() => setShowAddModal(true)} 
               disabled={!canAddKeys}
+              className="btn-primary"
               data-testid="add-key-btn"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -216,10 +217,10 @@ const Keys = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           {isOwner && (
             <Select value={selectedDealership} onValueChange={setSelectedDealership}>
-              <SelectTrigger className="w-full sm:w-64" data-testid="dealership-filter">
+              <SelectTrigger className="w-full sm:w-64 bg-[#111113] border-[#1f1f23] text-white" data-testid="dealership-filter">
                 <SelectValue placeholder="Select Dealership" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#111113] border-[#1f1f23]">
                 {dealerships.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     {d.name}
@@ -230,12 +231,12 @@ const Keys = () => {
           )}
 
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <Input
               placeholder="Search by stock #, model, or VIN..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-[#111113] border-[#1f1f23] text-white"
               data-testid="key-search"
             />
           </div>
@@ -247,6 +248,7 @@ const Keys = () => {
                 variant={filter === f ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setFilter(f)}
+                className={filter === f ? 'btn-primary' : 'border-[#1f1f23] text-slate-400 hover:text-white hover:bg-white/5'}
                 data-testid={`filter-${f}`}
               >
                 {f === 'all' ? 'All' : f === 'available' ? 'Available' : 'Checked Out'}
@@ -259,13 +261,13 @@ const Keys = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-40 bg-slate-100 rounded-xl animate-pulse" />
+              <div key={i} className="h-40 bg-white/5 rounded-xl animate-pulse" />
             ))}
           </div>
         ) : filteredKeys.length === 0 ? (
           <div className="text-center py-16">
-            <Key className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900">No keys found</h3>
+            <Key className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white">No keys found</h3>
             <p className="text-slate-500 mt-1">
               {search ? 'Try a different search term' : 'Add your first key to get started'}
             </p>
@@ -340,16 +342,16 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           {isRV ? (
-            <Truck className="w-5 h-5 text-slate-400" />
+            <Truck className="w-5 h-5 text-slate-500" />
           ) : (
-            <Car className="w-5 h-5 text-slate-400" />
+            <Car className="w-5 h-5 text-slate-500" />
           )}
-          <span className="stock-number text-lg text-slate-900">
+          <span className="stock-number text-lg text-white">
             #{keyData.stock_number}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className={isNew ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}>
+          <Badge className={isNew ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30'}>
             {isNew ? 'New' : 'Used'}
           </Badge>
           <Badge
@@ -360,16 +362,16 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
         </div>
       </div>
 
-      <p className="text-slate-700 font-medium">
+      <p className="text-slate-200 font-medium">
         {keyData.vehicle_year} {keyData.vehicle_make} {keyData.vehicle_model}
       </p>
       {keyData.vehicle_vin && (
-        <p className="text-xs text-slate-400 font-mono mt-1">VIN: {keyData.vehicle_vin}</p>
+        <p className="text-xs text-slate-500 font-mono mt-1">VIN: {keyData.vehicle_vin}</p>
       )}
 
       {isCheckedOut && checkout && (
-        <div className="mt-4 pt-4 border-t border-slate-100">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="mt-4 pt-4 border-t border-white/10">
+          <div className="flex items-center gap-2 text-sm text-slate-300">
             <User className="w-4 h-4" />
             <span>{checkout.user_name}</span>
           </div>
@@ -392,7 +394,7 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
         {isCheckedOut ? (
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full border-white/20 text-white hover:bg-white/10"
             onClick={onReturn}
             data-testid={`return-key-${keyData.stock_number}`}
           >
@@ -401,7 +403,7 @@ const KeyCard = ({ keyData, isRV, onCheckout, onReturn }) => {
           </Button>
         ) : (
           <Button
-            className="w-full"
+            className="w-full btn-success"
             onClick={onCheckout}
             data-testid={`checkout-key-${keyData.stock_number}`}
           >

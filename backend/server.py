@@ -1001,6 +1001,8 @@ async def get_sales_progress(user_id: str, year: Optional[int] = None, current_u
     total_writeups = sum(a.get("writeups", 0) for a in activities)
     total_sales = sum(a.get("sales", 0) for a in activities)
     total_appointments = sum(a.get("appointments_scheduled", 0) for a in activities)
+    days_worked = sum(1 for a in activities if a.get("worked", True))
+    days_off = sum(1 for a in activities if not a.get("worked", True))
     
     # Calculate progress
     now = datetime.now()
@@ -1018,21 +1020,20 @@ async def get_sales_progress(user_id: str, year: Optional[int] = None, current_u
         days_remaining = 365
     
     goal_response = SalesGoalResponse(**goal) if goal else None
-    
-    # Calculate percentages and projections
     sales_target = goal["yearly_sales_target"] if goal else 0
-    leads_target = goal["yearly_leads_target"] if goal else 0
-    writeups_target = goal["yearly_writeups_target"] if goal else 0
-    appointments_target = goal["yearly_appointments_target"] if goal else 0
     
-    sales_progress = (total_sales / sales_target * 100) if sales_target > 0 else 0
-    leads_progress = (total_leads / leads_target * 100) if leads_target > 0 else 0
-    writeups_progress = (total_writeups / writeups_target * 100) if writeups_target > 0 else 0
-    appointments_progress = (total_appointments / appointments_target * 100) if appointments_target > 0 else 0
+    # Calculate what's needed
+    sales_needed_remaining = max(0, sales_target - total_sales)
     
-    # Project annual sales based on current pace
-    daily_avg = total_sales / days_elapsed if days_elapsed > 0 else 0
-    projected_annual = int(daily_avg * 365)
+    # Weekly and monthly sales needed to hit goal (adjusted based on remaining time)
+    weeks_remaining = max(1, days_remaining / 7)
+    months_remaining = max(1, days_remaining / 30)
+    weekly_sales_needed = sales_needed_remaining / weeks_remaining if weeks_remaining > 0 else 0
+    monthly_sales_needed = sales_needed_remaining / months_remaining if months_remaining > 0 else 0
+    
+    # Current pace
+    current_pace_per_day = total_sales / days_worked if days_worked > 0 else 0
+    projected_annual = int(current_pace_per_day * 365) if days_worked > 0 else 0
     
     # Calculate probability based on pace vs target
     if sales_target > 0 and days_elapsed > 0:
@@ -1043,7 +1044,9 @@ async def get_sales_progress(user_id: str, year: Optional[int] = None, current_u
         else:
             probability = 0
     else:
-        probability = 0
+        probability = 0 if sales_target > 0 else 100
+    
+    on_track = total_sales >= (sales_target / 365) * days_elapsed if sales_target > 0 else True
     
     return SalesProgressResponse(
         goal=goal_response,
@@ -1051,14 +1054,17 @@ async def get_sales_progress(user_id: str, year: Optional[int] = None, current_u
         total_writeups=total_writeups,
         total_sales=total_sales,
         total_appointments=total_appointments,
-        sales_progress_percent=round(sales_progress, 1),
-        leads_progress_percent=round(leads_progress, 1),
-        writeups_progress_percent=round(writeups_progress, 1),
-        appointments_progress_percent=round(appointments_progress, 1),
+        days_worked=days_worked,
+        days_off=days_off,
         days_elapsed=days_elapsed,
         days_remaining=days_remaining,
+        sales_needed_remaining=sales_needed_remaining,
+        weekly_sales_needed=round(weekly_sales_needed, 1),
+        monthly_sales_needed=round(monthly_sales_needed, 1),
+        current_pace_per_day=round(current_pace_per_day, 2),
         projected_annual_sales=projected_annual,
-        goal_achievement_probability=round(probability, 1)
+        goal_achievement_probability=round(probability, 1),
+        on_track=on_track
     )
 
 @api_router.get("/team-sales-progress")
